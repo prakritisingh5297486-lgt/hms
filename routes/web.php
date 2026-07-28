@@ -55,6 +55,7 @@ Route::middleware(['auth', 'role:super-admin'])->prefix('super-admin')->name('su
     Route::delete('/doctors/{doctor}',[SuperAdminController::class,'deleteDoctor'])->name('doctors.destroy');
     Route::get('/patients',[SuperAdminController::class,'patients'])->name('patients');
     Route::post('/patients/store',[SuperAdminController::class,'storePatient'])->name('patients.store');
+    Route::post('/patients/{patient}/update',[SuperAdminController::class,'updatePatient'])->name('patients.update');
     Route::get('/patients/{patient}',[SuperAdminController::class,'deletePatient'])->name('patients.destroy');
     Route::get('/appointments',[SuperAdminController::class,'appointments'])->name('appointments');
     Route::put('/appointments/{appointment}',[SuperAdminController::class,'updateAppointment'])->name('appointments.update');

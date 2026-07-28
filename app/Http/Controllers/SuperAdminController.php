@@ -213,6 +213,62 @@ class SuperAdminController extends Controller
         ]);
         return redirect()->route('super-admin.patients')->with('success','Patient Add Successfully!');
     }
+    public function updatePatient(Request $request, $id)
+    {
+        $patient = Patient::findOrFail($id);
+        $user = User::findOrFail($patient->user_id);
+
+        $data = $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|unique:users,email,' . $user->id,
+            'password' => 'nullable|string|min:6',
+            'age' => 'required|string|max:50',
+            'gender' => 'required|string|max:50',
+            'number' => 'required|string|max:20|unique:patients,number,' . $patient->id,
+            'blood_group' => 'required|string|max:10',
+            'address' => 'nullable|string|max:500',
+            'disease' => 'nullable|string|max:255',
+            'profile' => 'nullable|image',
+        ]);
+
+        // Photo Upload
+        if ($request->hasFile('profile')) {
+
+            // Delete old photo
+            if ($patient->profile && file_exists(public_path('patients/' . $patient->profile))) {
+                unlink(public_path('patients/' . $patient->profile));
+            }
+
+            $file = $request->file('profile');
+            $filename = time() . '.' . $file->getClientOriginalExtension();
+            $file->move(public_path('patients'), $filename);
+
+            $patient->profile = $filename;
+        }
+
+        // Update User
+        $user->name = $data['name'];
+        $user->email = $data['email'];
+
+        if (!empty($data['password'])) {
+            $user->password = Hash::make($data['password']);
+        }
+
+        $user->save();
+
+        // Update Patient
+        $patient->age = $data['age'];
+        $patient->gender = $data['gender'];
+        $patient->number = $data['number'];
+        $patient->blood_group = $data['blood_group'];
+        $patient->disease = $data['disease'] ?? null;
+        $patient->address = $data['address'] ?? null;
+
+        $patient->save();
+
+        return redirect()->route('super-admin.patients')
+            ->with('success', 'Patient Updated Successfully!');
+    }
     public function deletePatient(Patient $patient){
         if($patient->profile && file_exists(public_path('patients/'.$patient->profile))){
             unlink(public_path('patients/'.$patient->profile));
