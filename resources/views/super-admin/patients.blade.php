@@ -131,7 +131,7 @@
                                             <button class="btn btn-premium btn-sm me-1 btn-sm" onclick="viewPatientDetails({{json_encode([
                                                 'id'=>$pt->id,
                                                 'name'=>$pt->user->name ?? '',
-                                                'id'=>$pt->user->email ?? '',
+                                                'email'=>$pt->user->email ?? '',
                                                 'age'=>$pt->age,
                                                 'gender'=>ucfirst($pt->gender),
                                                 'blood_group'=>$pt->blood_group,
@@ -145,7 +145,7 @@
                                             onclick="editPatient({{json_encode([
                                             'id'=>$pt->id,
                                             'name'=>$pt->user->name ?? '',
-                                            'id'=>$pt->user->email ?? '',
+                                            'email'=>$pt->user->email ?? '',
                                             'age'=>$pt->age,
                                             'gender'=>strtolower($pt->gender),
                                             'blood_group'=>$pt->blood_group,
@@ -209,7 +209,7 @@
                                     {{ ucfirst($pt->gender) }}
                                 </p>
 
-                                <div class="glass-sub-card p-3 rounded-3 border border-light border-opacity-10 bg-light bg-opacity-10 flex-grow-1 text-start">
+                                <div class="glass-sub-card p-3 rounded-3 border border-light border-opacity-10 bg-light bg-opacity-10 flex-grow-1 text-start mb-2">
 
                                     <div class="d-flex justify-content-between mb-2">
                                         <span class="text-muted">
@@ -249,7 +249,7 @@
                                 <button class="btn btn-premium btn-sm me-1 btn-sm" onclick="viewPatientDetails({{json_encode([
                                     'id'=>$pt->id,
                                     'name'=>$pt->user->name ?? '',
-                                    'id'=>$pt->user->email ?? '',
+                                    'email'=>$pt->user->email ?? '',
                                     'age'=>$pt->age,
                                     'gender'=>ucfirst($pt->gender),
                                     'blood_group'=>$pt->blood_group,
@@ -259,19 +259,20 @@
                                     'photo'=>$pt->profile_photo_url ?? '',
                                     'createdAt'=>$pt->created_at ? $pt->created_at->format('Y-m-d') : 'NA',
                                 ])}})" title="Access Medical Record"><i class="bi bi-file-earmark-medical me-1"></i>Access Diagnosis</button>
-                            </div>
+                            
                             <button class="btn btn-sm btn-premium me-1"
                                 onclick="editPatient({{json_encode([
                                 'id'=>$pt->id,
                                 'name'=>$pt->user->name ?? '',
-                                'id'=>$pt->user->email ?? '',
+                                'email'=>$pt->user->email ?? '',
                                 'age'=>$pt->age,
                                 'gender'=>strtolower($pt->gender),
                                 'blood_group'=>$pt->blood_group,
                                 'number'=>$pt->number,
                                 'disease'=>$pt->disease ?? '',
                                 'address'=>$pt->address ?? '',
-                                ])}})" title="Edit Patient"><i class="bi bi-pencil-fill"></i></button>
+                                ])}})" title="Edit Patient"><i class="bi bi-pencil-fill"></i>
+                                </button>
                                 <form action="{{ route('super-admin.patients.destroy', $pt->id) }}" class="d-inline-block" onsubmit="return confirm('Are you sure want to delete this patient record?')">
                                     @csrf
                                     @method('DELETE')
@@ -279,6 +280,7 @@
                                         <i class="bi bi-trash"></i>
                                     </button>
                                 </form>
+                                </div>
                             </div>   
                         </div>
                         @empty
@@ -369,67 +371,145 @@
     </div>
 
     <!-- MODAL: PATIENT FILES & DETAILS -->
-    <div class="modal fade modal-glass" id="patientDetailsModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered modal-xl">
+    <!--Patient Upadte Modals-->
+    <div class="modal fade modal-glass" id="editPatientModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
             <div class="modal-content">
                 <div class="modal-header border-light border-opacity-10">
-                    <h5 class="modal-title fw-bold">Electronic Health Record (EHR) - Eleanor Vance</h5>
+                    <h5 class="modal-title fw-bold"><i class="bi bi-pencil-square me-2 text-primary"></i>Update Patient Info</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <div class="modal-body">
-                    <div class="row g-4">
-                        <!-- Profile Summary & Documents -->
-                        <div class="col-lg-4 border-end border-light border-opacity-10 pe-lg-4">
-                            <div class="text-center mb-4">
-                                <img src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&q=80&w=150" alt="Patient" class="rounded-circle mb-3 border border-light border-opacity-10" style="width: 110px; height: 110px; object-fit: cover;">
-                                <h5 class="fw-bold mb-1">Eleanor Vance</h5>
-                                <span class="custom-badge badge-success mb-2">Age: 28 • Female</span>
+                <form id="editPatientForm" action="" method="post" enctype="multipart/form-data">
+                    @csrf
+                    <div class="modal-body">
+                        <div class="row g-3">
+                            <div class="col-md-12">
+                                <label class="form-label-custom">Profile Photo (leave blank then photo not change)</label>
+                                <input type="file" name="profile" class="form-control form-glass" >
                             </div>
-                            
-                            <h6 class="fw-bold text-primary mb-3">Patient Documents</h6>
-                            <div class="d-flex flex-column gap-2 mb-4">
-                                <div class="p-2 border border-light border-opacity-10 rounded-3 d-flex justify-content-between align-items-center glass-sub-card">
-                                    <span style="font-size: 0.85rem;"><i class="bi bi-file-earmark-pdf-fill text-danger me-2"></i>Blood_Count_Report.pdf</span>
-                                    <button class="btn btn-sm text-info p-0" onclick="showToast('Downloading Document', 'Blood_Count_Report.pdf dispatched.', 'success')"><i class="bi bi-download"></i></button>
-                                </div>
-                                <div class="p-2 border border-light border-opacity-10 rounded-3 d-flex justify-content-between align-items-center glass-sub-card">
-                                    <span style="font-size: 0.85rem;"><i class="bi bi-file-earmark-pdf-fill text-danger me-2"></i>Chest_XRay_Scan.pdf</span>
-                                    <button class="btn btn-sm text-info p-0" onclick="showToast('Downloading Document', 'Chest_XRay_Scan.pdf dispatched.', 'success')"><i class="bi bi-download"></i></button>
-                                </div>
+                            <div class="col-md-6">
+                                <label class="form-label-custom">Full Name</label>
+                                <input type="text" name="name" id="edit_name" class="form-control form-glass">
                             </div>
-
-                            <button class="btn btn-premium-outline btn-sm w-100" onclick="showToast('Upload Registry', 'Select files to push.', 'info')">
-                                <i class="bi bi-cloud-arrow-up-fill"></i> Upload New Document
-                            </button>
-                        </div>
-
-                        <!-- Timeline & Clinical Notes -->
-                        <div class="col-lg-8 ps-lg-4">
-                            <h6 class="fw-bold text-primary mb-4">EHR Medical Timeline & History</h6>
-                            <div class="timeline-custom">
-                                <div class="timeline-item success">
-                                    <div class="fw-semibold">Pathology Lab Blood Analysis (CBC)</div>
-                                    <small class="text-muted d-block mb-1">Uploaded by Chief Pathologist Dr. Sarah Connor</small>
-                                    <span class="badge bg-success bg-opacity-10 text-success mb-2">Ref Range: Normal</span>
-                                    <p class="text-muted small">Hemoglobin, Platelets and WBC count found within typical reference levels.</p>
-                                    <span style="font-size: 0.75rem; color: var(--text-muted);">2026-06-28</span>
-                                </div>
-                                <div class="timeline-item info">
-                                    <div class="fw-semibold">Cardiology OPD Consultation</div>
-                                    <small class="text-muted d-block mb-1">Assigned Medical Officer: Dr. Sarah Connor</small>
-                                    <p class="text-muted small">Patient presented with mild heart palpitation episodes. EKG trace completed, showing no major conduction discrepancies. Prescribed Ivabradine.</p>
-                                    <span style="font-size: 0.75rem; color: var(--text-muted);">2026-06-25</span>
-                                </div>
+                            <div class="col-md-6">
+                                <label class="form-label-custom">Email</label>
+                                <input type="email" name="email" id="edit_email" class="form-control form-glass">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label-custom">Password</label>
+                                <input type="password" name="password"  class="form-control form-glass">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label-custom">Age</label>
+                                <input type="number" name="age" id="edit_age" class="form-control form-glass" >
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label-custom">Gender</label>
+                                <select name="gender" id="edit_gender" class="form-select form-glass">
+                                    <option value="male">Male</option>
+                                    <option value="female">Female</option>
+                                    <option value="other">Other</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label-custom">Blood Group</label>
+                                <select name="blood_group" id="edit_blood_group" class="form-select form-glass">
+                                    <option value="A+">A+</option>
+                                    <option value="A-">A-</option>
+                                    <option value="B+">B+</option>
+                                    <option value="B-">B-</option>
+                                    <option value="AB+">AB+</option>
+                                    <option value="AB-">AB-</option>
+                                    <option value="O+">O+</option>
+                                    <option value="O-">O-</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label-custom">Contact Number</label>
+                                <input type="tel" name="number" id="edit_number" class="form-control form-glass"
+                                    placeholder="Enter Number">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label-custom">Disease</label>
+                                <input type="text" name="disease" id="edit_disease" class="form-control form-glass"
+                                    placeholder="Penicillin, Sulfa, none etc.">
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label-custom">Residental Address</label>
+                                <textarea class="form-control form-glass" rows="4" name="address" id="edit_address"
+                                    placeholder="Brief explanation of current patient diagnoses..."></textarea>
                             </div>
                         </div>
                     </div>
+                    <div class="mt-4 pt-3 border-top border-light border-opacity-10 d-flex justify-content-end gap-2">
+                        <button type="button" class="btn btn-premium-outline" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-premium">Update Patient</button>
+                    </div>
+                </form>
+           </div>
+        </div>
+    </div>
+    <!-- MODAL: PATIENT FILES & DETAILS -->
+    <div class="modal fade modal-glass" id="patientDetailsModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
+                <div class="modal-header border-light border-opacity-10">
+                    <h5 class="modal-title fw-bold">Electronic Health Record (EHR)</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row g-4 align-items-center">
+                        <!-- Profile Summary & Documents -->
+                        <div class="col-lg-4 text-center border-end border-light border-opacity-10 pe-md-4">
+                          
+                                <img src="" id="detail_photo"
+                                    alt="Patient" class="rounded-circle mb-3 border border-light border-opacity-10"
+                                    style="width: 110px; height: 110px; object-fit: cover;">
+                                <h5 class="fw-bold mb-1" id="detail_name">Patient Name</h5>
+                                <div class="mb-2"><span class="custom-badge badge-primary" id="detail_id"></span></div>
+                                <span class="custom-badge badge-success mb-2" id="detail_blood_group">O+</span>
+                        </div>
+                        <div class="col-md-8 ps-md-4">
+                            <div class="row g-3 mb-3">
+                                <div class="col-6">
+                                    <label class="text-muted small d-block">Age & Gender</label>
+                                    <span class="fw-bold text-white" id="detail_age_gender">NA</span>
+
+                                </div>
+                                <div class="col-6">
+                                    <label class="text-muted small d-block">Contact Number</label>
+                                    <span class="fw-bold text-white" id="detail_number">NA</span>
+                                </div>
+                                <div class="col-6">
+                                    <label class="text-muted small d-block">Email</label>
+                                    <span class="fw-bold text-white" id="detail_email">NA</span>
+                                </div>
+                                   <div class="col-6">
+                                    <label class="text-muted small d-block">Registered Date</label>
+                                    <span class="fw-bold text-warning fs-6" id="detail_created_at">NA</span>
+                                </div>
+                                 <div class="col-12">
+                                    <label class="text-muted small d-block">Condition/Illness</label>
+                                    <span class="fw-bold text-warining fs-6" id="detail_disease">NA</span>
+                                </div>
+                                <div class="col-12">
+                                    <label class="text-muted small d-block">Residential Address</label>
+                                    <span class="text-secondary small" id="detail_address">NA</span>
+                                </div>
+                            </div>
+
+                        </div>
+
+                    </div>
                 </div>
                 <div class="modal-footer border-light border-opacity-10">
-                    <button class="btn btn-premium btn-sm" data-bs-dismiss="modal">Close EHR Record</button>
+                    <button class="btn btn-premium w-100" data-bs-dismiss="modal">Close Record</button>
                 </div>
             </div>
         </div>
     </div>
+
 
     <script>
         function switchTab(tabId) {
@@ -439,19 +519,19 @@
             }
         }
         function editPatient(data) {
-                document.getElementById('editPatientForm').action = '/super-admin/patients/' + data.id + '/update';
-                document.getElementById('edit_name').value = data.name;
-                document.getElementById('edit_email').value = data.email;
-                document.getElementById('edit_age').value = data.age;
-                document.getElementById('edit_gender').value = data.gender;
-                document.getElementById('edit_blood_group').value = data.blood_group;
-                document.getElementById('edit_number').value = data.number;
-                document.getElementById('edit_disease').value = data.disease;
-                document.getElementById('edit_address').value = data.address;
+            document.getElementById('editPatientForm').action = '/super-admin/patients/' + data.id + '/update';
+            document.getElementById('edit_name').value = data.name;
+            document.getElementById('edit_email').value = data.email;
+            document.getElementById('edit_age').value = data.age;
+            document.getElementById('edit_gender').value = data.gender;
+            document.getElementById('edit_blood_group').value = data.blood_group;
+            document.getElementById('edit_number').value = data.number;
+            document.getElementById('edit_disease').value = data.disease;
+            document.getElementById('edit_address').value = data.address;
 
-                var modal = new bootstrap.Modal(document.getElementById('editPatientModal'));
-                modal.show();
-            }
+            var modal = new bootstrap.Modal(document.getElementById('editPatientModal'));
+            modal.show();
+        }
 
         function viewPatientDetails(data) {
             document.getElementById('detail_photo').src = data.photo;
