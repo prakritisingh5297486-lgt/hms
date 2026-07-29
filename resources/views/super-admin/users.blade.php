@@ -1,122 +1,161 @@
 @extends('super-admin.layouts.main')
 @section('content')
-            <!-- CONTENT BODY -->
-            <div class="content-body">
-                
-                <!-- BREADCRUMB & HEADER -->
-                <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
-                    <div>
-                        <nav>
-                            <ul class="breadcrumb-custom mb-1">
-                                <li class="breadcrumb-item-custom"><a href="/super-admin/dashboard">Home</a></li>
-                                <li class="breadcrumb-item-custom">Manage Users</li>
-                            </ul>
-                        </nav>
-                        <h4 class="fw-bold mb-0">System User & Role Center</h4>
-                    </div>
-                    
-                    <button class="btn btn-premium d-flex align-items-center gap-2" data-bs-toggle="modal" data-bs-target="#addUserModal">
-                        <i class="bi bi-person-plus-fill"></i> Provision User
-                    </button>
-                </div>
-
-                <!-- SKELETON LOADER -->
-                <div class="skeleton-wrapper row g-4 mb-4">
-                    <div class="col-md-8"><div class="glass-card skeleton" style="height: 400px;"></div></div>
-                    <div class="col-md-4"><div class="glass-card skeleton" style="height: 400px;"></div></div>
-                </div>
-
-                <!-- REAL CONTENT WRAPPER -->
-                <div class="real-content-wrapper d-none">
-                    
-                    <div class="row g-4 mb-4">
-                        <!-- USER ROSTER -->
-                        <div class="col-xl-8">
-                            <div class="glass-card h-100">
-                                <h5 class="mb-4 fw-bold">Active User Directory</h5>
-                                
-                                <div class="custom-table-container">
-                                    <table class="custom-table">
-                                        <thead>
-                                            <tr>
-                                                <th>User Profile</th>
-                                                <th>System Role</th>
-                                                <th>Active Permissions</th>
-                                                <th>Status</th>
-                                                <th class="text-end">Actions</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <tr>
-                                                <td>
-                                                    <div class="d-flex align-items-center gap-3">
-                                                        <img src="https://images.unsplash.com/photo-1622253692010-333f2da6031d?auto=format&fit=crop&q=80&w=100" class="rounded-circle" style="width: 36px; height: 36px; object-fit: cover;" alt="User">
-                                                        <div>
-                                                            <div class="fw-bold">Dr. Gregory House</div>
-                                                            <small class="text-muted">admin@aurahms.com</small>
-                                                        </div>
-                                                    </div>
-                                                </td>
-                                                <td><span class="badge bg-primary text-uppercase px-2 py-1">Super Admin</span></td>
-                                                <td>All System Permissions</td>
-                                                <td><span class="custom-badge badge-success">Active</span></td>
-                                                <td class="text-end">
-                                                    <button class="btn btn-sm btn-premium-outline me-2" onclick="showToast('Permission Config', 'Pre-filling permissions for Gregory House.', 'info')" data-bs-toggle="modal" data-bs-target="#addUserModal"><i class="bi bi-shield-check"></i></button>
-                                                    <button class="btn btn-sm btn-premium" disabled><i class="bi bi-trash-fill"></i></button>
-                                                </td>
-                                            </tr>
-                                            <tr>
-                                                <td>
-                                                    <div class="d-flex align-items-center gap-3">
-                                                        <img src="https://images.unsplash.com/photo-1594824813573-246434de83fb?auto=format&fit=crop&q=80&w=100" class="rounded-circle" style="width: 36px; height: 36px; object-fit: cover;" alt="User">
-                                                        <div>
-                                                            <div class="fw-bold">Dr. Sarah Connor</div>
-                                                            <small class="text-muted">doctor@aurahms.com</small>
-                                                        </div>
-                                                    </div>
-                                                </td>
-                                                <td><span class="badge bg-info text-uppercase px-2 py-1">Doctor</span></td>
-                                                <td>Schedule, Consult, Assigned Patients</td>
-                                                <td><span class="custom-badge badge-success">Active</span></td>
-                                                <td class="text-end">
-                                                    <button class="btn btn-sm btn-premium-outline me-2" data-bs-toggle="modal" data-bs-target="#addUserModal"><i class="bi bi-shield-check"></i></button>
-                                                    <button class="btn btn-sm btn-premium" onclick="showToast('De-provisioned user', 'Successfully disabled doctor role credentials.', 'warning')"><i class="bi bi-trash-fill"></i></button>
-                                                </td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- SECURITY AUDIT LOG -->
-                        <div class="col-xl-4">
-                            <div class="glass-card h-100">
-                                <h5 class="mb-4 fw-bold">Security & Audit Logs</h5>
-                                <div class="timeline-custom">
-                                    <div class="timeline-item success">
-                                        <div class="fw-bold" style="font-size: 0.85rem;">Super Admin Login Successful</div>
-                                        <small class="text-muted d-block mb-1">IP: 192.168.1.5 • Browser: Chrome/Win</small>
-                                        <span style="font-size: 0.75rem; color: var(--text-muted);">Just now</span>
-                                    </div>
-                                    <div class="timeline-item info">
-                                        <div class="fw-bold" style="font-size: 0.85rem;">Backup Dump Initialized</div>
-                                        <small class="text-muted d-block mb-1">Triggered manually by Dr. Gregory House</small>
-                                        <span style="font-size: 0.75rem; color: var(--text-muted);">2 hours ago</span>
-                                    </div>
-                                    <div class="timeline-item warning">
-                                        <div class="fw-bold" style="font-size: 0.85rem;">Credentials Update Requested</div>
-                                        <small class="text-muted d-block mb-1">Doctor Sarah Connor changed profile security passphrase</small>
-                                        <span style="font-size: 0.75rem; color: var(--text-muted);">Yesterday</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                </div>
-
+    <!-- CONTENT BODY -->
+    <div class="content-body">
+        
+        <!-- BREADCRUMB & HEADER -->
+        <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+            <div>
+                <nav>
+                    <ul class="breadcrumb-custom mb-1">
+                        <li class="breadcrumb-item-custom"><a href="/super-admin/dashboard">Home</a></li>
+                        <li class="breadcrumb-item-custom">Manage Users</li>
+                    </ul>
+                </nav>
+                <h4 class="fw-bold mb-0">System User & Role Center</h4>
             </div>
+            
+            <button class="btn btn-premium d-flex align-items-center gap-2" data-bs-toggle="modal" data-bs-target="#addUserModal">
+                <i class="bi bi-person-plus-fill"></i> Provision User
+            </button>
+        </div>
+
+        <!-- SKELETON LOADER -->
+        <div class="skeleton-wrapper row g-4 mb-4">
+            <div class="col-md-8"><div class="glass-card skeleton" style="height: 400px;"></div></div>
+            <div class="col-md-4"><div class="glass-card skeleton" style="height: 400px;"></div></div>
+        </div>
+
+        <!-- REAL CONTENT WRAPPER -->
+        <div class="real-content-wrapper d-none">
+            <div class="row g-4 mb-4">
+                @if(session('success'))
+                        <div class="alert alert-success alert-dismissible fade show">
+                            {{ session('success') }}
+
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    @endif
+
+
+                    @if(session('error'))
+                        <div class="alert alert-danger alert-dismissible fade show">
+                            {{ session('error') }}
+
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    @endif
+                <!-- USER ROSTER -->
+                <div class="col-xl-12">
+                    <div class="glass-card h-100">
+                        <h5 class="mb-4 fw-bold">Active User Directory</h5>
+                        
+                        <div class="custom-table-container">
+                            <table class="custom-table">
+                                <thead>
+                                    <tr>
+                                        <th>User Profile</th>
+                                        <th>System Role</th>
+                                        <th>Active Permissions</th>
+                                        <th>Status</th>
+                                        <th class="text-end">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @forelse($users as $user)
+                                    <tr>
+                                        <td>
+                                            <div class="d-flex align-items-center gap-3">
+                                                <img src="{{ $user->profile_photo_url }}"
+                                                    class="rounded-circle"
+                                                    style="width:36px;height:36px;object-fit:cover;">
+                                                <div>
+                                                    <div class="fw-bold">
+                                                        {{ $user->name }}
+                                                    </div>
+                                                    <small class="text-muted">
+                                                        {{ $user->email }}
+                                                    </small>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            @php
+                                            $badge=[
+                                                'super-admin'=>'primary',
+                                                'admin'=>'primary',
+                                                'doctor'=>'info',
+                                                'patient'=>'success',
+                                                'receptionist'=>'warning',
+                                                'staff'=>'secondary'
+                                            ];
+                                            @endphp
+                                            <span class="badge bg-{{ $badge[$user->role] ?? 'dark' }}">{{ ucfirst($user->role) }}</span>
+                                        </td>
+                                        <td>
+                                            @switch($user->role)
+                                            @case('super-admin')
+                                                All System Permissions
+                                                @break
+                                            @case('doctor')
+                                                Schedule, Consult, Assigned Patients
+                                                @break
+                                            @case('patient')
+                                                Patient Portal Access
+                                                @break
+                                            @default
+                                                Limited Access
+                                            @endswitch
+                                        </td>
+                                        <td>
+                                            @if($user->status == 'active')
+                                                <span class="custom-badge badge-success">Active</span>
+                                            @else
+                                                <span class="custom-badge badge-danger">Inactive</span>
+                                            @endif
+                                        </td>
+                                        <td class="text-end">
+                                            <button class="btn btn-sm btn-premium-outline me-2" onclick='editUser(@json($user))'>
+                                                <i class="bi bi-pencil-square"></i>
+                                            </button>
+                                            {{-- <button type="button" 
+                                                class="btn btn-sm btn-premium-outline me-2 editUserBtn"
+                                                data-id="{{ $user->id }}"
+                                                data-name="{{ $user->name }}"
+                                                data-email="{{ $user->email }}"
+                                                data-role="{{ $user->role }}"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#editUserModal">
+                                                <i class="bi bi-pencil-square"></i>
+                                            </button> --}}
+                                            @if($user->role!='super-admin')
+                                            <form action="{{ route('super-admin.users.destroy',$user->id) }}" method="POST" class="d-inline">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button class="btn btn-sm btn-premium" onclick="return confirm('Delete this user?')">
+                                                    <i class="bi bi-trash-fill"></i>
+                                                </button>
+                                            </form>
+                                            @endif
+                                        </td>
+                                    </tr>
+                                    @empty
+                                    <tr>
+                                    <td colspan="5" class="text-center py-5">
+                                    No Users Found
+                                    </td>
+                                    </tr>
+                                    @endforelse
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
 
     <!-- MODAL: ADD / PROVISION USER WITH PERMISSIONS CHECKBOXES -->
     <div class="modal fade modal-glass" id="addUserModal" tabindex="-1" aria-hidden="true">
@@ -126,86 +165,155 @@
                     <h5 class="modal-title fw-bold">System Credentials Provisioning</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <form onsubmit="event.preventDefault(); bootstrap.Modal.getInstance(document.getElementById('addUserModal')).hide(); showToast('User Provisioned', 'Account successfully created and key permissions linked.', 'success');">
+                <form action="{{ route('super-admin.users.store') }}" method="POST" enctype="multipart/form-data">
+                @csrf
                     <div class="modal-body">
                         <div class="row g-3 mb-4">
                             <div class="col-md-6">
                                 <label class="form-label-custom">Staff Full Name</label>
-                                <input type="text" class="form-control form-glass" placeholder="e.g. Dr. Watson" required>
+                                <input type="text" name="name" class="form-control form-glass" required>
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label-custom">Corporate Email Address</label>
-                                <input type="email" class="form-control form-glass" placeholder="watson@aurahms.com" required>
+                                <input type="email" name="email" class="form-control form-glass" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label-custom">Password</label>
+                                <input type="password" name="password" class="form-control form-glass" required>
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label-custom">Primary System Role</label>
-                                <select class="form-select form-glass" required>
-                                    <option value="doctor">Doctor / Clinician</option>
-                                    <option value="super-admin">Super Admin</option>
-                                    <option value="receptionist">Receptionist / Front Desk</option>
-                                    <option value="pharmacist">Pharmacist</option>
+                                <select name="role" class="form-select form-glass" required>
+                                <option value="" disabled selected>Select Role</option>
+                                <option value="super-admin">Super Admin</option>
+                                <option value="doctor">Doctor</option>
+                                <option value="patient">Patient</option>
                                 </select>
                             </div>
                             <div class="col-md-6">
-                                <label class="form-label-custom">Staff License Access Key</label>
-                                <input type="text" class="form-control form-glass" placeholder="e.g. MC-9024">
-                            </div>
-                        </div>
-
-                        <h6 class="fw-bold text-primary mb-3">Access Control Permissions Grid</h6>
-                        <div class="glass-sub-card p-4 rounded-4">
-                            <div class="row g-3">
-                                <div class="col-md-6">
-                                    <div class="form-check form-check-custom">
-                                        <input class="form-check-input" type="checkbox" id="permViewPatients" checked>
-                                        <label class="form-check-label text-white" for="permViewPatients">
-                                            View Patient Demographics & Records
-                                        </label>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="form-check form-check-custom">
-                                        <input class="form-check-input" type="checkbox" id="permEditPrescriptions" checked>
-                                        <label class="form-check-label text-white" for="permEditPrescriptions">
-                                            Compose & Edit Prescriptions
-                                        </label>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="form-check form-check-custom">
-                                        <input class="form-check-input" type="checkbox" id="permManageBilling">
-                                        <label class="form-check-label text-white" for="permManageBilling">
-                                            Process Billing Invoices & Receipts
-                                        </label>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="form-check form-check-custom">
-                                        <input class="form-check-input" type="checkbox" id="permDbBackup">
-                                        <label class="form-check-label text-white" for="permDbBackup">
-                                            Generate Database Dump Backups
-                                        </label>
-                                    </div>
-                                </div>
-                                <div class="col-md-12">
-                                    <div class="form-check form-check-custom">
-                                        <input class="form-check-input" type="checkbox" id="permManageUsers">
-                                        <label class="form-check-label text-white" for="permManageUsers">
-                                            Manage Accounts & Assign Access Roles
-                                        </label>
-                                    </div>
-                                </div>
+                                <label class="form-label-custom">Status</label>
+                                <select name="status" class="form-select form-glass">
+                                <option value="active">Active</option>
+                                <option value="inactive">Inactive</option>
+                                </select>
                             </div>
                         </div>
                     </div>
                     <div class="modal-footer border-light border-opacity-10">
                         <button type="button" class="btn btn-premium-outline" data-bs-dismiss="modal">Cancel</button>
-                        <button type="submit" class="btn btn-premium">Complete Provisioning</button>
+                        <button type="submit" class="btn btn-premium">Create User</button>
                     </div>
                 </form>
             </div>
         </div>
     </div>
- 
-    
+
+    <div class="modal fade modal-glass" id="editUserModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
+
+                <div class="modal-header border-light border-opacity-10">
+                    <h5 class="modal-title fw-bold">
+                        <i class="bi bi-pencil-square me-2 text-primary"></i>
+                        Update User
+                    </h5>
+
+                    <button type="button"
+                        class="btn-close btn-close-white"
+                        data-bs-dismiss="modal">
+                    </button>
+                </div>
+
+                <form id="editUserForm" method="POST">
+                    @csrf
+                    <div class="modal-body">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label-custom">Full Name</label>
+                                <input type="text" class="form-control form-glass" id="edit_name" name="name" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label-custom">Email</label>
+                                <input type="email" class="form-control form-glass" id="edit_email" name="email" required>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label-custom">Password</label>
+                                <input type="password" class="form-control form-glass" id="edit_password" name="password" placeholder="Leave blank to keep current password">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label-custom">Role</label>
+
+                                <select class="form-select form-glass" id="edit_role" name="role">
+                                    <option value="super-admin">Super Admin</option>
+                                    <option value="doctor">Doctor</option>
+                                    <option value="patient">Patient</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label-custom">Status</label>
+                                <select name="status" id="edit_status" class="form-control">
+                                    <option value="active">Active</option>
+                                    <option value="inactive">Inactive</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer border-light border-opacity-10">
+                        <button type="button" class="btn btn-premium-outline" data-bs-dismiss="modal">
+                            Cancel
+                        </button>
+                        <button type="submit" class="btn btn-premium">
+                            Update User
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+<script>
+    // Edit User
+        function editUser(data) {
+            document.getElementById('editUserForm').action =
+                '/super-admin/users/' + data.id + '/update';
+                document.getElementById('edit_name').value = data.name ?? '';
+                document.getElementById('edit_email').value = data.email ?? '';
+                document.getElementById('edit_role').value = data.role ?? '';
+                document.getElementById('edit_status').value = data.status;
+
+            // Password hamesha blank rahega
+            document.getElementById('edit_password').value = '';
+
+            let modal = new bootstrap.Modal(document.getElementById('editUserModal'));
+            modal.show();
+        }
+
+    // Reset Add User Form
+    const addModal = document.getElementById('addUserModal');
+
+    if(addModal){
+
+        addModal.addEventListener('hidden.bs.modal', function (){
+
+            document.getElementById('addUserForm').reset();
+
+        });
+
+    }
+
+    // Reset Edit User Form
+    const editModal = document.getElementById('editUserModal');
+
+    if(editModal){
+
+        editModal.addEventListener('hidden.bs.modal', function (){
+
+            document.getElementById('editUserForm').reset();
+
+        });
+
+    }
+
+</script>
 @endsection    

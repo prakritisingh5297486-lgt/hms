@@ -48,36 +48,49 @@ Route::match(['get','post'],'logout',[AuthController::class,'logout'])->name('lo
 //super admin
 Route::middleware(['auth', 'role:super-admin'])->prefix('super-admin')->name('super-admin.')->group(function(){
     Route::get('/dashboard',[SuperAdminController::class,'dashboard'])->name('dashboard');
+    
     Route::get('/users',[SuperAdminController::class,'users'])->name('users');
+    Route::post('/users/store', [SuperAdminController::class, 'storeUser'])->name('users.store');
+    Route::post('/users/{id}/update', [SuperAdminController::class, 'updateUser'])->name('users.update');
+    Route::delete('/users/{id}', [SuperAdminController::class, 'destroyUser'])->name('users.destroy');
+
     Route::get('/doctors',[SuperAdminController::class,'doctors'])->name('doctors');
     Route::post('/doctors/store',[SuperAdminController::class,'storeDoctor'])->name('doctors.store');
     Route::post('/doctors/{doctor}/update',[SuperAdminController::class,'updateDoctor'])->name('doctors.update');
     Route::delete('/doctors/{doctor}',[SuperAdminController::class,'deleteDoctor'])->name('doctors.destroy');
+
     Route::get('/patients',[SuperAdminController::class,'patients'])->name('patients');
     Route::post('/patients/store',[SuperAdminController::class,'storePatient'])->name('patients.store');
     Route::post('/patients/{patient}/update',[SuperAdminController::class,'updatePatient'])->name('patients.update');
     Route::get('/patients/{patient}',[SuperAdminController::class,'deletePatient'])->name('patients.destroy');
+
     Route::get('/appointments',[SuperAdminController::class,'appointments'])->name('appointments');
     Route::put('/appointments/{appointment}',[SuperAdminController::class,'updateAppointment'])->name('appointments.update');
     Route::delete('/appointments/{appointment}',[SuperAdminController::class,'destroyAppointment'])->name('appointments.destroy');
+
     Route::get('/billing',[SuperAdminController::class,'billing'])->name('billing');
     Route::post('/billing/store',[SuperAdminController::class,'storeInvoice'])->name('billing.store');
     Route::post('/billing/{invoice}/status',[SuperAdminController::class,'updateInvoiceStatus'])->name('billing.status');
     Route::get('/billing/{invoice}',[SuperAdminController::class,'deleteInvoice'])->name('billing.destroy');
+
     Route::get('/laboratory',[SuperAdminController::class,'laboratory'])->name('laboratory');
     Route::post('/laboratory',[SuperAdminController::class,'storeLabReport'])->name('laboratory.store');
     Route::put('/laboratory/{labReport}',[SuperAdminController::class,'updateLabReport'])->name('laboratory.update');
     Route::delete('/laboratory/{labReport}',[SuperAdminController::class, 'destroyLabReport'])->name('laboratory.destroy');
+
     Route::get('/reports',[SuperAdminController::class,'reports'])->name('reports');
     Route::get('/reports/export/pdf', [SuperAdminController::class, 'exportPDF'])->name('reports.export.pdf');
     Route::get('/reports/export/excel', [SuperAdminController::class, 'exportExcel'])->name('reports.export.excel');
+
     Route::get('/settings',[SuperAdminController::class,'settings'])->name('settings');
     Route::post('/settings',[SuperAdminController::class,'updateSettings'])->name('settings.update');
     Route::post('/settings/smtp',[SuperAdminController::class,'updateSMTP'])->name('settings.smtp');
     Route::post('/settings/security',[SuperAdminController::class,'updateSecurity'])->name('settings.security');
     Route::post('/settings/backup',[SuperAdminController::class,'generateBackup'])->name('settings.backup');
+
     Route::get('/backup/download/{id}',[SuperAdminController::class,'downloadBackup'])->name('settings.backup.download');
     Route::post('/backup/restore/{id}',[SuperAdminController::class,'restoreBackup'])->name('settings.backup.restore');
+
     Route::resource('medicines', MedicineController::class);
     });
 

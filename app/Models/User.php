@@ -86,43 +86,33 @@ class User extends Authenticatable
     {
         return $this->hasOne(Patient::class);
     }
-    public function getProfilePhotoUrlAttribute(){
-        $photo =null;
-        if($this->role==='doctor' && $this->doctor && !empty($this->doctor->profile_photo)){
-            $photo = $this->doctor->profile_photo;
-        }
-        elseif($this->role==='patient' && $this->patient && !empty($this->patient->profile)){
-            $photo = $this->patient->profile;
-        }
-        elseif(!empty($this->profile_photo)){
-            $photo = $this->profile_photo;
+    public function getProfilePhotoUrlAttribute()
+    {
+        // Super Admin Image
+        if (!empty($this->image) && file_exists(public_path('uploads/profile/' . $this->image))) {
+            return asset('uploads/profile/' . $this->image);
         }
 
-        if(!empty($photo)){
-            if(str_starts_with($photo,'http://') || 
-                str_starts_with($photo,'https://')){
-                 return $photo;
+        // Doctor Image
+        if ($this->role == 'doctor' && $this->doctor && !empty($this->doctor->profile_photo)) {
+
+            if (file_exists(public_path('doctors/profile/' . $this->doctor->profile_photo))) {
+                return asset('doctors/profile/' . $this->doctor->profile_photo);
             }
-            $possiblePaths= [
-                $photo,
-                'super-admin/profile/'.$photo,
-                'doctors/profile/'.$photo,
-                'uploads/profile/'.$photo,
-                'uploads/profile_photos/'.$photo,
-
-                ];
-
-                foreach($possiblePaths as $path){
-                    
-                    if(file_exists(public_path($path))){
-                        return asset($path);
-                    }
-                }
         }
-        $name = $this->name?:'User';
-        return 'https://ui-avatars.com/api/?name='.urlencode($name).
-        '&background=0D8ABC&color=fff&bold=true&rounded=true';
 
+        // Patient Image
+        if ($this->role == 'patient' && $this->patient && !empty($this->patient->profile)) {
+
+            if (file_exists(public_path('patients/' . $this->patient->profile))) {
+                return asset('patients/' . $this->patient->profile);
+            }
+        }
+
+        // Default Avatar
+        return 'https://ui-avatars.com/api/?name=' .
+            urlencode($this->name ?? 'User') .
+            '&background=0D8ABC&color=fff&bold=true&rounded=true';
     }
     /**
      * The attributes that should be hidden for serialization.

@@ -31,8 +31,103 @@ class SuperAdminController extends Controller
     {
         return view('super-admin.dashboard');
     }
-    public function users() : View{
-        return view('super-admin.users');
+    public function users()
+    {
+        $users = User::latest()->get();
+        return view('super-admin.users', compact('users'));
+    }
+
+    public function storeUser(Request $request)
+    {
+        $data = $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|unique:users,email',
+            'password' => 'required|min:6',
+            'role' => 'required|in:doctor,patient,super-admin',
+            'status' => 'required|in:active,inactive',
+        ]);
+
+        $user = User::create([
+            'name' => $data['name'],
+            'email' => $data['email'],
+            'password' => Hash::make($data['password']),
+            'role' => $data['role'],
+            'status' => $data['status'],
+        ]);
+
+        if ($user->role == 'doctor') {
+            Doctor::create([
+                'user_id' => $user->id,
+            ]);
+        }
+
+        if ($user->role == 'patient') {
+            Patient::create([
+                'user_id' => $user->id,
+            ]);
+        }
+
+        return redirect()->route('super-admin.users')
+            ->with('success', 'User created successfully.');
+    }
+    public function updateUser(Request $request, $id)
+    {
+        $user = User::findOrFail($id);
+
+        $data = $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|unique:users,email,' . $user->id,
+            'password' => 'nullable|min:6',
+            'role' => 'required|in:doctor,patient,super-admin',
+            'status' => 'required|in:active,inactive',
+        ]);
+
+        $oldRole = $user->role;
+
+        $user->name = $data['name'];
+        $user->email = $data['email'];
+        $user->role = $data['role'];
+        $user->status = $data['status'];
+
+        if (!empty($data['password'])) {
+            $user->password = Hash::make($data['password']);
+        }
+
+        $user->save();
+
+        // Role changed to Doctor
+        if ($user->role == 'doctor') {
+            Doctor::firstOrCreate([
+                'user_id' => $user->id,
+            ]);
+
+            Patient::where('user_id', $user->id)->delete();
+        }
+
+        // Role changed to Patient
+        if ($user->role == 'patient') {
+            Patient::firstOrCreate([
+                'user_id' => $user->id,
+            ]);
+
+            Doctor::where('user_id', $user->id)->delete();
+        }
+
+        return redirect()->route('super-admin.users')
+            ->with('success', 'User updated successfully.');
+    }
+    public function destroyUser($id)
+    {
+        $user = User::findOrFail($id);
+
+        if ($user->role == 'super-admin') {
+            return back()->with('error', 'Super Admin cannot be deleted.');
+        }
+
+        $user->delete();
+
+        return redirect()->route('super-admin.users')
+            ->with('success', 'User deleted successfully.');
     }
 
     public function doctors(Request $request) : View{
@@ -136,24 +231,24 @@ class SuperAdminController extends Controller
         return redirect()->route('super-admin.doctors')->with('success','Doctor Deleted Successfully!');
     }
 
-    public function storeUser(Request $request){
-        $data = $request->validate([
-            'name'=> 'required',
-            'email'=>'required|email|unique:users,email',
-            'role'=>'required',
-            'password'=>'required'
-        ]); 
-        $user = User::create([
-            'name'=>$data['name'],
-            'email'=>$data['email'],
-            'role'=>$data['role'],
-            'password'=>Hash::make($data['password']),
-        ]);
-        if($user->role==='doctor'){
-            $user->doctor()->create([
-            ]);
-        }
-    }
+    // public function storeUser(Request $request){
+    //     $data = $request->validate([
+    //         'name'=> 'required',
+    //         'email'=>'required|email|unique:users,email',
+    //         'role'=>'required',
+    //         'password'=>'required'
+    //     ]); 
+    //     $user = User::create([
+    //         'name'=>$data['name'],
+    //         'email'=>$data['email'],
+    //         'role'=>$data['role'],
+    //         'password'=>Hash::make($data['password']),
+    //     ]);
+    //     if($user->role==='doctor'){
+    //         $user->doctor()->create([
+    //         ]);
+    //     }
+    // }
 
     public function patients(Request $request) : View{
         $query = Patient::with(['user','medicalRecords','labDocuments','appointments.doctor.user']);
