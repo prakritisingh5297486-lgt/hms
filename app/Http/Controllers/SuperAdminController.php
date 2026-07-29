@@ -27,9 +27,100 @@ use Illuminate\Support\Facades\Mail;
 
 class SuperAdminController extends Controller
 {
-    public function dashboard(): View  
+    public function dashboard()
     {
-        return view('super-admin.dashboard');
+        // Statistics
+        $totalUsers = User::count();
+        $totalDoctors = Doctor::count();
+        $totalPatients = Patient::count();
+        $totalDepartments = Doctor::select('department')->distinct()->count();
+        $totalAppointments = Appointment::count();
+        // Monthly Appointments
+        $monthlyAppointments = [];
+
+        for ($i = 1; $i <= 12; $i++) {
+
+            $monthlyAppointments[] = Appointment::whereYear('appointment_date',now()->year)
+            ->whereMonth('appointment_date', $i)
+            ->count();
+        }
+        // Appointment Status
+
+        $appointmentStatus = [
+            Appointment::where('status','pending')->count(),
+            Appointment::where('status','confirmed')->count(),
+            Appointment::where('status','completed')->count(),
+            Appointment::where('status','cancelled')->count(),
+        ];
+        $pendingAppointments = Appointment::where('status', 'pending')->count();
+        $completedAppointments = Appointment::where('status', 'completed')->count();
+        $recentAppointments = Appointment::with([
+        'patient.user',
+        'doctor.user'])
+        ->latest()->take(5)->get();
+        $latestDoctors = Doctor::with('user')->latest()->take(5)->get();
+
+        // Today's Appointments
+        $todayAppointments = Appointment::whereDate(
+            'appointment_date',
+            Carbon::today()
+        )->count();
+
+        $recentActivities = collect();
+
+        // Latest Users
+        foreach (User::latest()->take(2)->get() as $user) {
+            $recentActivities->push([
+                'title' => 'New User Registered',
+                'description' => $user->name . ' joined as ' . ucfirst($user->role),
+                'time' => $user->created_at,
+                'type' => 'success'
+            ]);
+        }
+
+        // Latest Doctors
+        foreach (Doctor::with('user')->latest()->take(2)->get() as $doctor) {
+            $recentActivities->push([
+                'title' => 'New Doctor Added',
+                'description' => $doctor->user->name . ' - ' . ($doctor->department ?? 'Department not assigned'),
+                'time' => $doctor->created_at,
+                'type' => 'info'
+            ]);
+        }
+
+        // Latest Appointments
+        foreach (Appointment::with(['patient.user','doctor.user'])->latest()->take(2)->get() as $appointment) {
+            $recentActivities->push([
+                'title' => 'Appointment Booked',
+                'description' =>
+                    optional($appointment->patient->user)->name .
+                    ' booked with Dr. ' .
+                    optional($appointment->doctor->user)->name,
+                'time' => $appointment->created_at,
+                'type' => 'warning'
+            ]);
+        }
+
+        $recentActivities = $recentActivities
+            ->sortByDesc('time')
+            ->take(6);
+
+        return view('super-admin.dashboard', compact(
+            'totalUsers',
+            'totalDoctors',
+            'totalPatients',
+            'totalDepartments',
+            'totalAppointments',
+            'todayAppointments',
+            'monthlyAppointments',
+            'appointmentStatus',
+            'pendingAppointments',
+            'completedAppointments',
+            'recentAppointments',
+            'latestDoctors',
+            'recentActivities'
+        ));
+        
     }
     public function users()
     {
@@ -116,8 +207,7 @@ class SuperAdminController extends Controller
         return redirect()->route('super-admin.users')
             ->with('success', 'User updated successfully.');
     }
-    public function destroyUser($id)
-    {
+    public function destroyUser($id){
         $user = User::findOrFail($id);
 
         if ($user->role == 'super-admin') {
@@ -469,6 +559,7 @@ class SuperAdminController extends Controller
                 ->back()
                 ->with('success', 'Appointment deleted successfully.');
     }
+
     public function billing(Request $request) : View{
         $query = Invoice::with(['patient.user','items']);
         if($request->filled('status')){
@@ -561,6 +652,7 @@ class SuperAdminController extends Controller
         $invoice->delete();
         return redirect()->with('success','Invoice Deleted Successfully!');
     }
+
     public function laboratory(): View
     {
         $patients = Patient::with('user')->get();
@@ -693,221 +785,247 @@ class SuperAdminController extends Controller
         );
     }
     public function reports() : View{
-    $totalPatients = Patient::count();
+        $totalPatients = Patient::count();
 
-    $totalDoctors = Doctor::count();
+        $totalDoctors = Doctor::count();
 
-    $totalAppointments = Appointment::count();
+        $totalAppointments = Appointment::count();
 
-    $totalRevenue = Payment::sum('amount');
+        $totalRevenue = Payment::sum('amount');
 
-    $appointments = Appointment::with(['patient.user','doctor.user'])
-                        ->latest()
-                        ->take(10)
+        $appointments = Appointment::with(['patient.user','doctor.user'])
+                            ->latest()
+                            ->take(10)
+                            ->get();
+        $lowStocks = Medicine::whereColumn('stock','<=','minimum_stock')
+                        ->orderBy('stock')
+                        ->take(5)
                         ->get();
-    $lowStocks = Medicine::whereColumn('stock','<=','minimum_stock')
-                    ->orderBy('stock')
-                    ->take(5)
-                    ->get();
-    return view('super-admin.reports', compact(
-        'totalPatients',
-        'totalDoctors',
-        'totalAppointments',
-        'totalRevenue',
-        'appointments',
-        'lowStocks'
-    ));
-    }
-    public function exportPDF()
-    {
-        $patients = Patient::count();
-        $doctors = Doctor::count();
-        $appointments = Appointment::count();
-        $revenue = Payment::sum('total_amount');
-
-        $pdf = Pdf::loadView('super-admin.reports.pdf', compact(
-            'patients',
-            'doctors',
+        return view('super-admin.reports', compact(
+            'totalPatients',
+            'totalDoctors',
+            'totalAppointments',
+            'totalRevenue',
             'appointments',
-            'revenue'
+            'lowStocks'
         ));
-
-        return $pdf->download('Hospital_Report.pdf');
-    }
-    public function exportExcel()
-    {
-        return Excel::download(new ReportExport, 'Hospital_Report.xlsx');
-    }
-    public function settings() : View{
-        $setting = HospitalSetting::first();
-        $backups = Backup::latest()->get();
-        return view('super-admin.settings', compact('setting','backups'));
-    }
-    public function updateSettings(Request $request)
-    {
-        // dd($request->hasFile('logo'));
-        $request->validate([
-            'hospital_name' => 'required|string|max:255',
-            'phone' => 'required|string|max:20',
-            'address' => 'required|string',
-            'logo' => 'nullable|image|mimes:jpg,jpeg,png',
-            'favicon' => 'nullable|image|mimes:ico,png,jpg,jpeg',
-        ]);
-
-        $data = [
-            'hospital_name' => $request->hospital_name,
-            'phone'         => $request->phone,
-            'address'       => $request->address,
-        ];
-
-        // Logo Upload
-        if ($request->hasFile('logo')) {
-            $file = $request->file('logo');
-            $logoName = time().'_'.$file->getClientOriginalName();
-            $file->move(public_path('uploads/settings'), $logoName);
-            $data['logo'] = $logoName;
-            // dd($logoName, file_exists(public_path('uploads/settings/'.$logoName)));
         }
+        public function exportPDF()
+        {
+            $patients = Patient::count();
+            $doctors = Doctor::count();
+            $appointments = Appointment::count();
+            $revenue = Payment::sum('total_amount');
 
+            $pdf = Pdf::loadView('super-admin.reports.pdf', compact(
+                'patients',
+                'doctors',
+                'appointments',
+                'revenue'
+            ));
 
-        // Favicon Upload
-        if ($request->hasFile('favicon')) {
-            $icon = $request->file('favicon');
-            $faviconName = time().'_'.$icon->getClientOriginalName();
-            $icon->move(public_path('uploads/settings'), $faviconName);
-            $data['favicon'] = $faviconName;
+            return $pdf->download('Hospital_Report.pdf');
         }
-        // HospitalSetting::updateOrCreate(
-        //     [
-        //         'id' => 1
-        //     ],
-        //     [
-        //         'hospital_name' => $request->hospital_name,
-        //         'phone' => $request->phone,
-        //         'address' => $request->address,
-        //         'logo' => $logoName ?? null,
-        //         'favicon' => $faviconName ?? null,
-        //     ]
-        // );   
-        HospitalSetting::updateOrCreate(
-            ['id' => 1],
-            $data
-        );
-        // dd($setting->toArray());
-
-        return back()->with('success', 'Hospital settings updated successfully.');
-    }
-    public function updateSMTP(Request $request)
-    {
-        // dd($request->all());
-        $request->validate([
-            'mail_mailer'      => 'required|string|max:50',
-            'mail_host'        => 'required|string|max:255',
-            'mail_port'        => 'required|numeric',
-            'mail_encryption'  => 'required|string|max:20',
-            'mail_username'    => 'required|string|max:255'
-        ]);
-
-        HospitalSetting::updateOrCreate(
-            ['id' => 1],
-            [
-                'mail_mailer'       => $request->mail_mailer,
-                'mail_host'         => $request->mail_host,
-                'mail_port'         => $request->mail_port,
-                'mail_encryption'   => $request->mail_encryption,
-                'mail_username'     => $request->mail_username
-            ]
-        );
-        // dd($setting->toArray());
-        return back()->with('success','SMTP Settings Updated Successfully.');
-    }
-    public function updateSecurity(Request $request)
-    {
-        $request->validate([
-            'email' => 'required|email',
-            'current_password' => 'required',
-            'password' => 'required|confirmed',
+        public function exportExcel()
+        {
+            return Excel::download(new ReportExport, 'Hospital_Report.xlsx');
+        }
+        public function settings() : View{
+            $setting = HospitalSetting::first();
+            $backups = Backup::latest()->get();
+            return view('super-admin.settings', compact('setting','backups'));
+        }
+        
+        public function updateSettings(Request $request)
+        {
+            // dd($request->hasFile('logo'));
+            $request->validate([
+                'hospital_name' => 'required|string|max:255',
+                'phone' => 'required|string|max:20',
+                'address' => 'required|string',
+                'logo' => 'nullable|image|mimes:jpg,jpeg,png',
+                'favicon' => 'nullable|image|mimes:ico,png,jpg,jpeg',
             ]);
-            // dd('1');
 
-        $user = Auth::user();
+            $data = [
+                'hospital_name' => $request->hospital_name,
+                'phone'         => $request->phone,
+                'address'       => $request->address,
+            ];
 
-        if (!Hash::check($request->current_password, $user->password)) {
+            // Logo Upload
+            if ($request->hasFile('logo')) {
+                $file = $request->file('logo');
+                $logoName = time().'_'.$file->getClientOriginalName();
+                $file->move(public_path('uploads/settings'), $logoName);
+                $data['logo'] = $logoName;
+                // dd($logoName, file_exists(public_path('uploads/settings/'.$logoName)));
+            }
 
-            return back()->with('error','Current password is incorrect.');
+
+            // Favicon Upload
+            if ($request->hasFile('favicon')) {
+                $icon = $request->file('favicon');
+                $faviconName = time().'_'.$icon->getClientOriginalName();
+                $icon->move(public_path('uploads/settings'), $faviconName);
+                $data['favicon'] = $faviconName;
+            }
+            // HospitalSetting::updateOrCreate(
+            //     [
+            //         'id' => 1
+            //     ],
+            //     [
+            //         'hospital_name' => $request->hospital_name,
+            //         'phone' => $request->phone,
+            //         'address' => $request->address,
+            //         'logo' => $logoName ?? null,
+            //         'favicon' => $faviconName ?? null,
+            //     ]
+            // );   
+            HospitalSetting::updateOrCreate(
+                ['id' => 1],
+                $data
+            );
+            // dd($setting->toArray());
+
+            return back()->with('success', 'Hospital settings updated successfully.');
         }
+        public function updateAdminProfile(Request $request)
+        {
+            $request->validate([
+                'name' => 'required|string|max:255',
+                'image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
+            ]);
 
-        $user->update([
+            $user = Auth::user();
 
-            'email' => $request->email,
+            $user->name = $request->name;
 
-            'password' => Hash::make($request->password),
+            if($request->hasFile('image')){
 
-        ]);
-        // dd('Reached Here');
-        return back()->with('success','Profile updated successfully.');
-    }
-    public function generateBackup()
-    {
-        $database = env('DB_DATABASE');
+                $file = $request->file('image');
+                $filename = time().'_'.$file->getClientOriginalName();
 
-        $filename = 'backup_'.date('Y-m-d_H-i-s').'.sql';
+                $file->move(public_path('super-admin'), $filename);
 
-        $path = public_path('backups');
+                $user->image = $filename;
+            }
 
-        if(!File::exists($path)){
-            File::makeDirectory($path,0755,true);
+            $user->save();
+
+            return back()->with('success','Admin profile updated successfully');
         }
+        public function updateSMTP(Request $request)
+        {
+            // dd($request->all());
+            $request->validate([
+                'mail_mailer'      => 'required|string|max:50',
+                'mail_host'        => 'required|string|max:255',
+                'mail_port'        => 'required|numeric',
+                'mail_encryption'  => 'required|string|max:20',
+                'mail_username'    => 'required|string|max:255'
+            ]);
 
-        $filepath = $path.'/'.$filename;
+            HospitalSetting::updateOrCreate(
+                ['id' => 1],
+                [
+                    'mail_mailer'       => $request->mail_mailer,
+                    'mail_host'         => $request->mail_host,
+                    'mail_port'         => $request->mail_port,
+                    'mail_encryption'   => $request->mail_encryption,
+                    'mail_username'     => $request->mail_username
+                ]
+            );
+            // dd($setting->toArray());
+            return back()->with('success','SMTP Settings Updated Successfully.');
+        }
+        public function updateSecurity(Request $request)
+        {
+            $request->validate([
+                'email' => 'required|email',
+                'current_password' => 'required',
+                'password' => 'required|confirmed',
+                ]);
+                // dd('1');
 
-        $command = "mysqldump -u".env('DB_USERNAME').
-                " -p".env('DB_PASSWORD').
-                " ".$database.
-                " > ".$filepath;
+            $user = Auth::user();
 
-        exec($command);
+            if (!Hash::check($request->current_password, $user->password)) {
 
-        Backup::create([
-            'file_name'=>$filename,
-            'file_path'=>$filepath,
-            'file_size'=>round(filesize($filepath)/1024,2).' KB',
-            'status'=>'Completed'
-        ]);
+                return back()->with('error','Current password is incorrect.');
+            }
 
-        return back()->with('success','Backup Generated Successfully');
-    }
-    public function downloadBackup($id)
-    {
-        $backup = Backup::findOrFail($id);
+            $user->update([
 
-        return response()->download($backup->file_path);
-    }
-    public function restoreBackup($id)
-    {
-        return back()->with(
-            'info',
-            'Restore functionality will be configured.'
-        );
-    }
-    // public function previewError($type)
-    // {
-    //     switch ($type) {
+                'email' => $request->email,
 
-    //         case 403:
-    //             return response()->view('errors.403', [], 403);
+                'password' => Hash::make($request->password),
 
-    //         case 404:
-    //             return response()->view('errors.404', [], 404);
+            ]);
+            // dd('Reached Here');
+            return back()->with('success','Profile updated successfully.');
+        }
+        public function generateBackup()
+        {
+            $database = env('DB_DATABASE');
 
-    //         case 500:
-    //             return response()->view('errors.500', [], 500);
+            $filename = 'backup_'.date('Y-m-d_H-i-s').'.sql';
 
-    //         case 'maintenance':
-    //             return view('errors.maintenance');
+            $path = public_path('backups');
 
-    //         default:
-    //             abort(404);
-    //     }
-    // }
+            if(!File::exists($path)){
+                File::makeDirectory($path,0755,true);
+            }
+
+            $filepath = $path.'/'.$filename;
+
+            $command = "mysqldump -u".env('DB_USERNAME').
+                    " -p".env('DB_PASSWORD').
+                    " ".$database.
+                    " > ".$filepath;
+
+            exec($command);
+
+            Backup::create([
+                'file_name'=>$filename,
+                'file_path'=>$filepath,
+                'file_size'=>round(filesize($filepath)/1024,2).' KB',
+                'status'=>'Completed'
+            ]);
+
+            return back()->with('success','Backup Generated Successfully');
+        }
+        public function downloadBackup($id)
+        {
+            $backup = Backup::findOrFail($id);
+
+            return response()->download($backup->file_path);
+        }
+        public function restoreBackup($id)
+        {
+            return back()->with(
+                'info',
+                'Restore functionality will be configured.'
+            );
+        }
+        // public function previewError($type)
+        // {
+        //     switch ($type) {
+
+        //         case 403:
+        //             return response()->view('errors.403', [], 403);
+
+        //         case 404:
+        //             return response()->view('errors.404', [], 404);
+
+        //         case 500:
+        //             return response()->view('errors.500', [], 500);
+
+        //         case 'maintenance':
+        //             return view('errors.maintenance');
+
+        //         default:
+        //             abort(404);
+        //     }
+        // }
 }

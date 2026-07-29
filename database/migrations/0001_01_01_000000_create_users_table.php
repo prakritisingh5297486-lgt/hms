@@ -16,10 +16,6 @@ return new class extends Migration
             $table->string('name');
             $table->string('email')->unique();
             $table->string('role')->default('patient');
-            $table->string('age')->nullable();
-            $table->string('blood_group')->nullable();
-            $table->string('department')->nullable();
-            $table->string('license_id')->nullable();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
             $table->rememberToken();

@@ -47,8 +47,9 @@ Route::match(['get','post'],'logout',[AuthController::class,'logout'])->name('lo
 
 //super admin
 Route::middleware(['auth', 'role:super-admin'])->prefix('super-admin')->name('super-admin.')->group(function(){
+    Route::get('/search', [SuperAdminController::class, 'search'])->name('search');
     Route::get('/dashboard',[SuperAdminController::class,'dashboard'])->name('dashboard');
-    
+
     Route::get('/users',[SuperAdminController::class,'users'])->name('users');
     Route::post('/users/store', [SuperAdminController::class, 'storeUser'])->name('users.store');
     Route::post('/users/{id}/update', [SuperAdminController::class, 'updateUser'])->name('users.update');
@@ -84,6 +85,7 @@ Route::middleware(['auth', 'role:super-admin'])->prefix('super-admin')->name('su
 
     Route::get('/settings',[SuperAdminController::class,'settings'])->name('settings');
     Route::post('/settings',[SuperAdminController::class,'updateSettings'])->name('settings.update');
+    Route::post('/settings/adminUpdate',[SuperAdminController::class,'updateAdminProfile'])->name('profile.update');
     Route::post('/settings/smtp',[SuperAdminController::class,'updateSMTP'])->name('settings.smtp');
     Route::post('/settings/security',[SuperAdminController::class,'updateSecurity'])->name('settings.security');
     Route::post('/settings/backup',[SuperAdminController::class,'generateBackup'])->name('settings.backup');

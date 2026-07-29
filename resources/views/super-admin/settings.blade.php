@@ -54,6 +54,9 @@
                                 <button class="nav-link active border-0 bg-transparent px-3 py-2 fw-semibold" id="branding-tab" data-bs-toggle="tab" data-bs-target="#tab-branding" type="button" role="tab"><i class="bi bi-patch-check"></i> Clinic Profile</button>
                             </li>
                             <li class="nav-item">
+                                <button class="nav-link border-0 bg-transparent px-3 py-2 fw-semibold" id="admin-tab" data-bs-toggle="tab" data-bs-target="#tab-admin" type="button" role="tab"><i class="bi bi-person-badge"></i> Admin Profile</button>
+                            </li>
+                            <li class="nav-item">
                                 <button class="nav-link border-0 bg-transparent px-3 py-2 fw-semibold" id="smtp-tab" data-bs-toggle="tab" data-bs-target="#tab-smtp" type="button" role="tab"><i class="bi bi-envelope-at"></i> Mail Server (SMTP)</button>
                             </li>
                             <li class="nav-item">
@@ -125,6 +128,36 @@
                                     </div>
                                     <div class="mt-4 pt-3 border-top border-light border-opacity-10 d-flex justify-content-end">
                                         <button type="submit" class="btn btn-premium">Save Clinic Profile</button>
+                                    </div>
+                                </form>
+                            </div>
+                            <!-- ADMIN PROFILE -->
+                            <div class="tab-pane fade show" id="tab-admin" role="tabpanel">
+                                <form action="{{ route('super-admin.profile.update') }}" enctype="multipart/form-data" method="POST">
+                                    @csrf
+                                    <div class="row g-3">
+                                        <div class="col-md-6">
+                                            <label class="form-label-custom">Name</label>
+                                            <input type="text" 
+                                                name="name" 
+                                                class="form-control form-glass" 
+                                                value="{{ old('name', Auth::user()->name) }}">
+                                        </div>
+                                        <div class="col-md-6">
+                                            <img src="{{ Auth::user()->image ? asset('super-admin/'.Auth::user()->image)
+                                            : asset('images/default-user.png') }}" alt="Admin" class="profile-avatar">
+                                            <label class="form-label-custom">Upload Profile Picture</label>
+                                            <input type="file" name="image" class="form-control form-glass">
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label-custom">Role</label>
+                                            <input type="text" class="form-control form-glass" value="{{Auth::user()->role}}" readonly>
+                                        </div>
+                                    </div>
+                                    <div class="mt-4 pt-3 border-top border-light border-opacity-10 d-flex justify-content-end">
+                                        <button type="submit" class="btn btn-premium">
+                                            Save Admin Profile
+                                        </button>
                                     </div>
                                 </form>
                             </div>

@@ -31,6 +31,19 @@
                         <span>My Schedule Shift</span>
                     </a>
                 </li>
+                <div class="glass-card p-3 mt-3 rounded-4">
+
+                    <div class="d-flex align-items-center mb-2">
+                        <i class="bi bi-telephone-fill me-2"></i>
+                        <small>{{ $setting->phone ?? 'Not Available' }}</small>
+                    </div>
+
+                    <div class="d-flex align-items-start">
+                        <i class="bi bi-geo-alt-fill me-2 mt-1"></i>
+                        <small>{{ $setting->address ?? 'Address Not Available' }}</small>
+                    </div>
+
+                </div>
                 
                 <li class="menu-item mt-auto">
                     <a href="{{ route('logout')}}" class="menu-item-link text-danger">
