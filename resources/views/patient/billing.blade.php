@@ -37,161 +37,252 @@
             margin: 1.5rem 0;
         }
     </style>
-            <!-- CONTENT BODY -->
-            <div class="content-body">
-                
-                <!-- BREADCRUMB -->
-                <nav>
-                    <ul class="breadcrumb-custom">
-                        <li class="breadcrumb-item-custom"><a href="/patient/dashboard">Home</a></li>
-                        <li class="breadcrumb-item-custom">Bills & Payments</li>
-                    </ul>
-                </nav>
+    <!-- CONTENT BODY -->
+    <div class="content-body">
+        
+        <!-- BREADCRUMB -->
+        <nav>
+            <ul class="breadcrumb-custom">
+                <li class="breadcrumb-item-custom"><a href="/patient/dashboard">Home</a></li>
+                <li class="breadcrumb-item-custom">Bills & Payments</li>
+            </ul>
+        </nav>
 
-                <!-- SKELETON LOADER -->
-                <div class="skeleton-wrapper row g-4 mb-4">
-                    <div class="col-md-5"><div class="glass-card skeleton" style="height: 350px;"></div></div>
-                    <div class="col-md-7"><div class="glass-card skeleton" style="height: 500px;"></div></div>
-                </div>
+        <!-- SKELETON LOADER -->
+        <div class="skeleton-wrapper row g-4 mb-4">
+            <div class="col-md-5"><div class="glass-card skeleton" style="height: 350px;"></div></div>
+            <div class="col-md-7"><div class="glass-card skeleton" style="height: 500px;"></div></div>
+        </div>
 
-                <!-- REAL CONTENT WRAPPER -->
-                <div class="real-content-wrapper d-none">
-                    
-                    <div class="row g-4">
-                        <!-- LEFT PANEL: MY INVOICES LOG -->
-                        <div class="col-xl-5">
-                            <div class="glass-card h-100">
-                                <h5 class="fw-bold mb-4">My Invoice Ledger</h5>
-                                <div class="d-flex flex-column gap-2">
-                                    <div class="p-3 border border-light border-opacity-10 rounded-4 glass-sub-card d-flex justify-content-between align-items-center">
-                                        <div>
-                                            <span class="fw-bold d-block">#AURA-10283</span>
-                                            <small class="text-muted">OPD + Pathology Screenings</small>
-                                            <small class="text-muted d-block mt-1">Issued: 2026-06-28</small>
-                                        </div>
-                                        <div class="text-end">
-                                            <span class="fw-bold d-block">$1,450.00</span>
-                                            <span class="custom-badge badge-success mt-1">Paid</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+        <!-- REAL CONTENT WRAPPER -->
+        <div class="real-content-wrapper d-none">
+            
+            <div class="row g-4">
+                <!-- LEFT PANEL: MY INVOICES LOG -->
+                <div class="col-xl-5">
+                    <div class="glass-card h-100">
+                        <h5 class="fw-bold mb-4">My Invoice Ledger</h5>
 
-                        <!-- RIGHT PANEL: PROFESSIONAL LIVE PREVIEW -->
-                        <div class="col-xl-7">
-                            <div class="d-flex justify-content-between align-items-center mb-3">
-                                <h6 class="fw-bold mb-0">Active Invoice Statement</h6>
-                                <button class="btn btn-premium btn-sm" onclick="window.print()"><i class="bi bi-printer"></i> Print Statement</button>
-                            </div>
+                        <div class="d-flex flex-column gap-2">
 
-                            <!-- PRINTABLE INVOICE SHEET -->
-                            <div class="invoice-preview-sheet">
-                                <div class="d-flex justify-content-between align-items-start mb-4">
+                            @forelse($invoices as $invoice)
+
+                                <div class="p-3 border border-light border-opacity-10 rounded-4 glass-sub-card d-flex justify-content-between align-items-center">
+
                                     <div>
-                                        <h4 class="fw-bold mb-1" style="color: var(--primary);">Aura Hospital Group</h4>
-                                        <p class="text-muted mb-0 small">742 Evergreen Terrace, Medical District<br>Springfield, OR 97477 • support@aurahms.com</p>
+                                        <span class="fw-bold d-block">
+                                            #{{ $invoice->invoice_number }}
+                                        </span>
+
+                                        <small class="text-muted d-block">
+                                            {{ $setting->hospital_name }}
+                                        </small>
+
+                                        <small class="text-muted d-block mt-1">
+                                            Issued:
+                                            {{ $invoice->billing_date->format('d M Y') }}
+                                        </small>
+
+                                        <small class="text-muted d-block">
+                                            Due:
+                                            {{ $invoice->due_date->format('d M Y') }}
+                                        </small>
                                     </div>
+
                                     <div class="text-end">
-                                        <h3 class="fw-bold mb-1" style="letter-spacing: -0.5px;">RECEIPT</h3>
-                                        <span class="fw-semibold text-muted">#AURA-10283</span>
+
+                                        <span class="fw-bold d-block">
+                                            ${{ number_format($invoice->total_amount,2) }}
+                                        </span>
+
+                                        @if($invoice->status == 'paid')
+                                            <span class="custom-badge badge-success mt-1">
+                                                Paid
+                                            </span>
+
+                                        @elseif($invoice->status == 'unpaid')
+                                            <span class="custom-badge badge-danger mt-1">
+                                                Unpaid
+                                            </span>
+
+                                        @elseif($invoice->status == 'pending')
+                                            <span class="custom-badge badge-warning mt-1">
+                                                Pending
+                                            </span>
+
+                                        @else
+                                            <span class="custom-badge badge-secondary mt-1">
+                                                {{ ucfirst($invoice->status) }}
+                                            </span>
+                                        @endif
+
                                     </div>
+
                                 </div>
 
-                                <div class="divider-line"></div>
+                            @empty
 
-                                <div class="row mb-4">
-                                    <div class="col-md-6 mb-3 mb-md-0">
-                                        <span class="text-muted d-block mb-1 text-uppercase fw-semibold" style="font-size: 0.75rem;">Patient Details:</span>
-                                        <h6 class="fw-bold mb-1">Eleanor Vance</h6>
-                                        <p class="text-muted mb-0 small">Patient ID: #PT-1082<br>Email: eleanor@vance.com<br>Contact: +1 (555) 019-2834</p>
-                                    </div>
-                                    <div class="col-md-6 text-md-end">
-                                        <span class="text-muted d-block mb-1 text-uppercase fw-semibold" style="font-size: 0.75rem;">Billing Info:</span>
-                                        <p class="text-muted mb-0 small">
-                                            Billing Date: <span class="fw-semibold text-dark">2026-06-28</span><br>
-                                            Due Date: <span class="fw-semibold text-dark">2026-07-05</span><br>
-                                            Status: <span class="fw-semibold text-success">Paid via Visa Card</span>
-                                        </p>
-                                    </div>
+                                <div class="text-center py-5">
+
+                                    <i class="bi bi-receipt fs-1 text-muted"></i>
+
+                                    <h6 class="mt-3 mb-2">
+                                        No Invoice Found
+                                    </h6>
+
+                                    <p class="text-muted mb-0">
+                                        You don't have any billing records yet.
+                                    </p>
+
                                 </div>
 
-                                <table class="table table-borderless mb-4">
-                                    <thead>
-                                        <tr>
-                                            <th style="width: 55%;">Item Description</th>
-                                            <th class="text-end" style="width: 15%;">Rate</th>
-                                            <th class="text-center" style="width: 15%;">Qty</th>
-                                            <th class="text-end" style="width: 15%;">Total</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr>
-                                            <td>
-                                                <div class="fw-bold">Cardiology OPD Consultation Session</div>
-                                                <small class="text-muted">Clinical Specialist: Dr. Sarah Connor</small>
-                                            </td>
-                                            <td class="text-end">$150.00</td>
-                                            <td class="text-center">1</td>
-                                            <td class="text-end">$150.00</td>
-                                        </tr>
-                                        <tr>
-                                            <td>
-                                                <div class="fw-bold">Comprehensive Pathology Screening (CBC + Lipid Profile)</div>
-                                                <small class="text-muted">Laboratory Diagnostics Division</small>
-                                            </td>
-                                            <td class="text-end">$350.00</td>
-                                            <td class="text-center">1</td>
-                                            <td class="text-end">$350.00</td>
-                                        </tr>
-                                        <tr>
-                                            <td>
-                                                <div class="fw-bold">Pacemaker Implant Post-Op ICU Care Charge</div>
-                                                <small class="text-muted">OPD critical care ward room 12</small>
-                                            </td>
-                                            <td class="text-end">$1,000.00</td>
-                                            <td class="text-center">1</td>
-                                            <td class="text-end">$1,000.00</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
+                            @endforelse
 
-                                <div class="divider-line"></div>
-
-                                <div class="row">
-                                    <div class="col-md-6 mb-3 mb-md-0">
-                                        <h6 class="fw-bold mb-2">Terms & Insurance:</h6>
-                                        <p class="text-muted small mb-0">Payments are due within 7 days from billing date. Payments processed are insurance covered under health policy AuraPlus. Thank you.</p>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="d-flex flex-column gap-2 text-dark" style="font-size: 0.9rem;">
-                                            <div class="d-flex justify-content-between">
-                                                <span class="text-muted">Subtotal:</span>
-                                                <span class="fw-semibold">$1,500.00</span>
-                                            </div>
-                                            <div class="d-flex justify-content-between text-success">
-                                                <span>Insurance Discount (10%):</span>
-                                                <span class="fw-semibold">-$150.00</span>
-                                            </div>
-                                            <div class="d-flex justify-content-between text-muted">
-                                                <span>GST Summary (CGST 9% + SGST 9%):</span>
-                                                <span class="fw-semibold">+$100.00</span>
-                                            </div>
-                                            <div class="divider-line my-1"></div>
-                                            <div class="d-flex justify-content-between fw-bold" style="font-size: 1.1rem; color: var(--primary);">
-                                                <span>Total Amount Paid:</span>
-                                                <span>$1,450.00</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
                         </div>
                     </div>
-
                 </div>
 
+                <!-- RIGHT PANEL: PROFESSIONAL LIVE PREVIEW -->
+                <div class="col-xl-7">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h6 class="fw-bold mb-0">Active Invoice Statement</h6>
+
+                        @if($activeInvoice)
+                            <button class="btn btn-premium btn-sm" onclick="window.print()">
+                                <i class="bi bi-printer"></i> Print Statement
+                            </button>
+                        @endif
+                    </div>
+
+                    @if($activeInvoice)
+
+                    <!-- PRINTABLE INVOICE SHEET -->
+                    <div class="invoice-preview-sheet">
+                        <div class="d-flex justify-content-between align-items-start mb-4">
+                            <div>
+                                <h4 class="fw-bold mb-1" style="color: var(--primary);">
+                                    {{ $setting->hospital_name }}
+                                </h4>
+                                <p class="text-muted mb-0 small">
+                                    {{ $setting->address }}<br>
+                                    {{ $setting->phone }}
+                                    @if(!empty($setting->mail_username))
+                                        • {{ $setting->mail_username }}
+                                    @endif
+                                </p>
+                            </div>
+                            <div class="text-end">
+                                <h3 class="fw-bold mb-1">RECEIPT</h3>
+                                <span class="fw-semibold text-muted">
+                                    #{{ $activeInvoice->invoice_number }}
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="divider-line"></div>
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <span class="text-muted d-block mb-1 text-uppercase fw-semibold">
+                                    Patient Details:
+                                </span>
+                                <h6 class="fw-bold mb-1">
+                                    {{ $activeInvoice->patient->user->name }}
+                                </h6>
+                                <p class="text-muted mb-0 small">
+                                    Patient ID :
+                                    #PT-{{ $activeInvoice->patient->user->id }}<br>
+                                    Email :
+                                    {{ $activeInvoice->patient->user->email }}<br>
+                                    Contact :
+                                    {{ $activeInvoice->patient->number }}
+                                </p>
+                            </div>
+
+                            <div class="col-md-6 text-md-end">
+                                <span class="text-muted d-block mb-1 text-uppercase fw-semibold">
+                                    Billing Info:
+                                </span>
+                                <p class="text-muted mb-0 small">
+                                    Billing Date :
+                                    {{ $activeInvoice->billing_date->format('d M Y') }}<br>
+                                    Due Date :
+                                    {{ $activeInvoice->due_date->format('d M Y') }}<br>
+                                    Payment Method :
+                                    {{ $activeInvoice->payment_method ?? 'N/A' }}<br>
+                                    Status :
+                                    {{ ucfirst($activeInvoice->status) }}
+                                </p>
+                            </div>
+                        </div>
+                        <table class="table table-borderless mb-4">
+                            <thead>
+                            <tr>
+                                <th>Description</th>
+                                <th class="text-end">Rate</th>
+                                <th class="text-center">Qty</th>
+                                <th class="text-end">Total</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            @foreach($activeInvoice->items as $item)
+                            <tr>
+                                <td>{{ $item->description }}</td>
+                                <td class="text-end">
+                                    ${{ number_format($item->rate,2) }}
+                                </td>
+                                <td class="text-center">
+                                    {{ $item->qty }}
+                                </td>
+                                <td class="text-end">
+                                    ${{ number_format($item->total,2) }}
+                                </td>
+                            </tr>
+                            @endforeach
+                            </tbody>
+                        </table>
+                        <div class="divider-line"></div>
+                        <div class="d-flex justify-content-end">
+                            <table style="width:320px">
+                                <tr>
+                                    <td>Subtotal</td>
+                                    <td class="text-end">
+                                        ${{ number_format($activeInvoice->subtotal,2) }}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Discount</td>
+                                    <td class="text-end">
+                                        -${{ number_format($activeInvoice->discount,2) }}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>GST</td>
+                                    <td class="text-end">
+                                        +${{ number_format($activeInvoice->gst,2) }}
+                                    </td>
+                                </tr>
+                                <tr class="fw-bold">
+                                    <td>Total</td>
+                                    <td class="text-end">
+                                        ${{ number_format($activeInvoice->total_amount,2) }}
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                    @else
+                    <div class="glass-card text-center py-5">
+                        <i class="bi bi-receipt fs-1 text-muted"></i>
+                        <h5 class="mt-3">No Invoice Found</h5>
+                        <p class="text-muted mb-0">
+                            You don't have any invoices yet.
+                        </p>
+                    </div>
+                    @endif
+                </div>
             </div>
-        </main>
+
+        </div>
+
     </div>
 @endsection

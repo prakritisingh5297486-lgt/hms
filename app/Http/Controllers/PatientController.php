@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Appointment;
 use App\Models\Doctor;
+use App\Models\Invoice;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
@@ -133,9 +134,21 @@ class PatientController extends Controller
 
         return back()->with('success', 'Appointment cancelled successfully.');
     }
-    public function billing(): View
+    public function billing()
     {
-        return view('patient.billing');
+        $patient = Auth::user()->patient;
+
+        $invoices = Invoice::with(['items', 'patient.user'])
+            ->where('patient_id', $patient->id)
+            ->latest()
+            ->get();
+
+        $activeInvoice = $invoices->first();
+
+        return view('patient.billing', compact(
+            'invoices',
+            'activeInvoice'
+        ));
     }
     public function records(): View
     {

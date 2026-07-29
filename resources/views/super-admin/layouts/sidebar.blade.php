@@ -1,9 +1,17 @@
 <aside class="sidebar" id="sidebar">
             <div class="sidebar-brand">
-                <div class="sidebar-logo">
-                    <i class="bi bi-heart-pulse-fill"></i>
-                </div>
-                <span class="sidebar-brand-name">AuraHMS</span>
+                {{-- <div class="sidebar-logo"> --}}
+                    @if(!empty($setting?->logo))
+                        <img src="{{ asset('uploads/settings/'.$setting->logo) }}"  
+                            alt="Hospital Logo" width="50" height="50" class="rounded">
+                    @else
+                        <div class="rounded d-flex align-items-center justify-content-center"
+                            style="width:70px;height:70px;background:linear-gradient(135deg,#3b82f6,#06b6d4);">
+                            <i class="bi bi-heart-pulse-fill text-white fs-2"></i>
+                        </div>
+                    @endif
+                {{-- </div> --}}
+                <span class="sidebar-brand-name">{{$setting->hospital_name}}</span>
             </div>
             
             <ul class="sidebar-menu">

@@ -3,7 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AuraHMS - Appointments Module</title>
+    <title>{{$setting->hospital_name}} - Super-admin </title>
+    @if(!empty($setting?->favicon))
+        <link rel="icon" href="{{ asset('uploads/settings/'.$setting->favicon) }}" type="image/x-icon">
+    @else
+        <link rel="icon" type="image/png" href="{{ asset('uploads/settings/default-favicon.png') }}">
+    @endif
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Bootstrap Icons -->

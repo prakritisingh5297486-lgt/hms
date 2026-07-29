@@ -810,204 +810,211 @@ class SuperAdminController extends Controller
             'lowStocks'
         ));
         }
-        public function exportPDF()
-        {
-            $patients = Patient::count();
-            $doctors = Doctor::count();
-            $appointments = Appointment::count();
-            $revenue = Payment::sum('total_amount');
+    public function exportPDF()
+    {
+        $patients = Patient::count();
+        $doctors = Doctor::count();
+        $appointments = Appointment::count();
+        $revenue = Payment::sum('total_amount');
 
-            $pdf = Pdf::loadView('super-admin.reports.pdf', compact(
-                'patients',
-                'doctors',
-                'appointments',
-                'revenue'
-            ));
+        $pdf = Pdf::loadView('super-admin.reports.pdf', compact(
+            'patients',
+            'doctors',
+            'appointments',
+            'revenue'
+        ));
 
-            return $pdf->download('Hospital_Report.pdf');
-        }
-        public function exportExcel()
-        {
-            return Excel::download(new ReportExport, 'Hospital_Report.xlsx');
-        }
-        public function settings() : View{
-            $setting = HospitalSetting::first();
-            $backups = Backup::latest()->get();
-            return view('super-admin.settings', compact('setting','backups'));
-        }
+        return $pdf->download('Hospital_Report.pdf');
+    }
+    public function exportExcel()
+    {
+        return Excel::download(new ReportExport, 'Hospital_Report.xlsx');
+    }
+    public function settings() : View{
+        $setting = HospitalSetting::first();
+        $backups = Backup::latest()->get();
+        return view('super-admin.settings', compact('setting','backups'));
+    }
         
-        public function updateSettings(Request $request)
-        {
-            // dd($request->hasFile('logo'));
-            $request->validate([
-                'hospital_name' => 'required|string|max:255',
-                'phone' => 'required|string|max:20',
-                'address' => 'required|string',
-                'logo' => 'nullable|image|mimes:jpg,jpeg,png',
-                'favicon' => 'nullable|image|mimes:ico,png,jpg,jpeg',
-            ]);
+    public function updateSettings(Request $request)
+    {
+        // dd($request->hasFile('logo'));
+        $request->validate([
+            'hospital_name' => 'required|string|max:255',
+            'phone' => 'required|string|max:20',
+            'address' => 'required|string',
+            'logo' => 'nullable|image|mimes:jpg,jpeg,png',
+            'favicon' => 'nullable|image|mimes:ico,png,jpg,jpeg',
+        ]);
 
-            $data = [
-                'hospital_name' => $request->hospital_name,
-                'phone'         => $request->phone,
-                'address'       => $request->address,
-            ];
-
-            // Logo Upload
-            if ($request->hasFile('logo')) {
-                $file = $request->file('logo');
-                $logoName = time().'_'.$file->getClientOriginalName();
-                $file->move(public_path('uploads/settings'), $logoName);
-                $data['logo'] = $logoName;
-                // dd($logoName, file_exists(public_path('uploads/settings/'.$logoName)));
+        $data = [
+            'hospital_name' => $request->hospital_name,
+            'phone'         => $request->phone,
+            'address'       => $request->address,
+        ];
+        // Logo Upload
+        if ($request->hasFile('logo')) {
+            // Purana logo delete
+            if (!empty($setting->logo) && file_exists(public_path('uploads/settings/' . $setting->logo))) {
+                unlink(public_path('uploads/settings/' . $setting->logo));
             }
+            $file = $request->file('logo');
+            $logoName = time().'_'.$file->getClientOriginalName();
+            $file->move(public_path('uploads/settings'), $logoName);
+            $data['logo'] = $logoName;
+            // dd($logoName, file_exists(public_path('uploads/settings/'.$logoName)));
+        }
 
 
-            // Favicon Upload
-            if ($request->hasFile('favicon')) {
-                $icon = $request->file('favicon');
-                $faviconName = time().'_'.$icon->getClientOriginalName();
-                $icon->move(public_path('uploads/settings'), $faviconName);
-                $data['favicon'] = $faviconName;
+        // Favicon Upload
+        if ($request->hasFile('favicon')) {
+            // Purana favicon delete
+            if (!empty($setting->favicon) && file_exists(public_path('uploads/settings/' . $setting->logo))) {
+                unlink(public_path('uploads/settings/' . $setting->logo));
             }
-            // HospitalSetting::updateOrCreate(
-            //     [
-            //         'id' => 1
-            //     ],
-            //     [
-            //         'hospital_name' => $request->hospital_name,
-            //         'phone' => $request->phone,
-            //         'address' => $request->address,
-            //         'logo' => $logoName ?? null,
-            //         'favicon' => $faviconName ?? null,
-            //     ]
-            // );   
-            HospitalSetting::updateOrCreate(
-                ['id' => 1],
-                $data
-            );
-            // dd($setting->toArray());
-
-            return back()->with('success', 'Hospital settings updated successfully.');
+            $icon = $request->file('favicon');
+            $faviconName = time().'_'.$icon->getClientOriginalName();
+            $icon->move(public_path('uploads/settings'), $faviconName);
+            $data['favicon'] = $faviconName;
         }
-        public function updateAdminProfile(Request $request)
-        {
-            $request->validate([
-                'name' => 'required|string|max:255',
-                'image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
+        // HospitalSetting::updateOrCreate(
+        //     [
+        //         'id' => 1
+        //     ],
+        //     [
+        //         'hospital_name' => $request->hospital_name,
+        //         'phone' => $request->phone,
+        //         'address' => $request->address,
+        //         'logo' => $logoName ?? null,
+        //         'favicon' => $faviconName ?? null,
+        //     ]
+        // );   
+        HospitalSetting::updateOrCreate(
+            ['id' => 1],
+            $data
+        );
+        // dd($setting->toArray());
+
+        return back()->with('success', 'Hospital settings updated successfully.');
+    }
+    public function updateAdminProfile(Request $request)
+    {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
+        ]);
+
+        $user = Auth::user();
+
+        $user->name = $request->name;
+
+        if($request->hasFile('image')){
+
+            $file = $request->file('image');
+            $filename = time().'_'.$file->getClientOriginalName();
+
+            $file->move(public_path('super-admin'), $filename);
+
+            $user->image = $filename;
+        }
+
+        $user->save();
+
+        return back()->with('success','Admin profile updated successfully');
+    }
+    public function updateSMTP(Request $request)
+    {
+        // dd($request->all());
+        $request->validate([
+            'mail_mailer'      => 'required|string|max:50',
+            'mail_host'        => 'required|string|max:255',
+            'mail_port'        => 'required|numeric',
+            'mail_encryption'  => 'required|string|max:20',
+            'mail_username'    => 'required|string|max:255'
+        ]);
+
+        HospitalSetting::updateOrCreate(
+            ['id' => 1],
+            [
+                'mail_mailer'       => $request->mail_mailer,
+                'mail_host'         => $request->mail_host,
+                'mail_port'         => $request->mail_port,
+                'mail_encryption'   => $request->mail_encryption,
+                'mail_username'     => $request->mail_username
+            ]
+        );
+        // dd($setting->toArray());
+        return back()->with('success','SMTP Settings Updated Successfully.');
+    }
+    public function updateSecurity(Request $request)
+    {
+        $request->validate([
+            'email' => 'required|email',
+            'current_password' => 'required',
+            'password' => 'required|confirmed',
             ]);
+            // dd('1');
 
-            $user = Auth::user();
+        $user = Auth::user();
 
-            $user->name = $request->name;
+        if (!Hash::check($request->current_password, $user->password)) {
 
-            if($request->hasFile('image')){
-
-                $file = $request->file('image');
-                $filename = time().'_'.$file->getClientOriginalName();
-
-                $file->move(public_path('super-admin'), $filename);
-
-                $user->image = $filename;
-            }
-
-            $user->save();
-
-            return back()->with('success','Admin profile updated successfully');
+            return back()->with('error','Current password is incorrect.');
         }
-        public function updateSMTP(Request $request)
-        {
-            // dd($request->all());
-            $request->validate([
-                'mail_mailer'      => 'required|string|max:50',
-                'mail_host'        => 'required|string|max:255',
-                'mail_port'        => 'required|numeric',
-                'mail_encryption'  => 'required|string|max:20',
-                'mail_username'    => 'required|string|max:255'
-            ]);
 
-            HospitalSetting::updateOrCreate(
-                ['id' => 1],
-                [
-                    'mail_mailer'       => $request->mail_mailer,
-                    'mail_host'         => $request->mail_host,
-                    'mail_port'         => $request->mail_port,
-                    'mail_encryption'   => $request->mail_encryption,
-                    'mail_username'     => $request->mail_username
-                ]
-            );
-            // dd($setting->toArray());
-            return back()->with('success','SMTP Settings Updated Successfully.');
+        $user->update([
+
+            'email' => $request->email,
+
+            'password' => Hash::make($request->password),
+
+        ]);
+        // dd('Reached Here');
+        return back()->with('success','Profile updated successfully.');
+    }
+    public function generateBackup()
+    {
+        $database = env('DB_DATABASE');
+
+        $filename = 'backup_'.date('Y-m-d_H-i-s').'.sql';
+
+        $path = public_path('backups');
+
+        if(!File::exists($path)){
+            File::makeDirectory($path,0755,true);
         }
-        public function updateSecurity(Request $request)
-        {
-            $request->validate([
-                'email' => 'required|email',
-                'current_password' => 'required',
-                'password' => 'required|confirmed',
-                ]);
-                // dd('1');
 
-            $user = Auth::user();
+        $filepath = $path.'/'.$filename;
 
-            if (!Hash::check($request->current_password, $user->password)) {
+        $command = "mysqldump -u".env('DB_USERNAME').
+                " -p".env('DB_PASSWORD').
+                " ".$database.
+                " > ".$filepath;
 
-                return back()->with('error','Current password is incorrect.');
-            }
+        exec($command);
 
-            $user->update([
+        Backup::create([
+            'file_name'=>$filename,
+            'file_path'=>$filepath,
+            'file_size'=>round(filesize($filepath)/1024,2).' KB',
+            'status'=>'Completed'
+        ]);
 
-                'email' => $request->email,
+        return back()->with('success','Backup Generated Successfully');
+    }
+    public function downloadBackup($id)
+    {
+        $backup = Backup::findOrFail($id);
 
-                'password' => Hash::make($request->password),
-
-            ]);
-            // dd('Reached Here');
-            return back()->with('success','Profile updated successfully.');
-        }
-        public function generateBackup()
-        {
-            $database = env('DB_DATABASE');
-
-            $filename = 'backup_'.date('Y-m-d_H-i-s').'.sql';
-
-            $path = public_path('backups');
-
-            if(!File::exists($path)){
-                File::makeDirectory($path,0755,true);
-            }
-
-            $filepath = $path.'/'.$filename;
-
-            $command = "mysqldump -u".env('DB_USERNAME').
-                    " -p".env('DB_PASSWORD').
-                    " ".$database.
-                    " > ".$filepath;
-
-            exec($command);
-
-            Backup::create([
-                'file_name'=>$filename,
-                'file_path'=>$filepath,
-                'file_size'=>round(filesize($filepath)/1024,2).' KB',
-                'status'=>'Completed'
-            ]);
-
-            return back()->with('success','Backup Generated Successfully');
-        }
-        public function downloadBackup($id)
-        {
-            $backup = Backup::findOrFail($id);
-
-            return response()->download($backup->file_path);
-        }
-        public function restoreBackup($id)
-        {
-            return back()->with(
-                'info',
-                'Restore functionality will be configured.'
-            );
-        }
+        return response()->download($backup->file_path);
+    }
+    public function restoreBackup($id)
+    {
+        return back()->with(
+            'info',
+            'Restore functionality will be configured.'
+        );
+    }
         // public function previewError($type)
         // {
         //     switch ($type) {
