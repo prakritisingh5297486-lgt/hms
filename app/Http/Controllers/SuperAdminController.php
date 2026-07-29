@@ -154,6 +154,7 @@ class SuperAdminController extends Controller
             ]);
         }
     }
+
     public function patients(Request $request) : View{
         $query = Patient::with(['user','medicalRecords','labDocuments','appointments.doctor.user']);
         if($request->filled('search')){
@@ -199,7 +200,7 @@ class SuperAdminController extends Controller
             'email' => $data['email'],
             'password' => Hash::make($data['password']),
             'role'=>'patient',
-            // 'status'=>'active'
+            'status'=>'active'
         ]);
         Patient::create([
             'user_id'=>$user->id,
@@ -213,8 +214,7 @@ class SuperAdminController extends Controller
         ]);
         return redirect()->route('super-admin.patients')->with('success','Patient Add Successfully!');
     }
-    public function updatePatient(Request $request, $id)
-    {
+    public function updatePatient(Request $request, $id){
         $patient = Patient::findOrFail($id);
         $user = User::findOrFail($patient->user_id);
 

@@ -60,7 +60,7 @@ class Patient extends Model
         return $this->hasMany(LabReport::class);
     }
     public function getProfilePhotoUrlAttribute(){
-        $photo =$this->profile_photo;
+        $photo =$this->profile;
         if(!empty($photo)){
             if(str_starts_with($photo,'http://') || 
                 str_starts_with($photo,'https://')){
@@ -71,7 +71,9 @@ class Patient extends Model
                 'super-admin/profile/'.$photo,
                 'doctors/profile/'.$photo,
                 'uploads/profile/'.$photo,
+                'uploads/settings/'.$photo,
                 'uploads/profile_photos/'.$photo,
+                'patients/'.$photo
 
                 ];
 
