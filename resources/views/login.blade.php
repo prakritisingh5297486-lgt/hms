@@ -4,6 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AuraHMS - Unified Portal Hub</title>
+    @if(!empty($setting?->favicon))
+        <link rel="icon" href="{{ asset('uploads/settings/'.$setting->favicon) }}" type="icon">
+    @else
+        <link rel="icon" type="image/png" href="{{ asset('uploads/settings/default-favicon.png') }}">
+    @endif
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Bootstrap Icons -->
@@ -166,7 +171,7 @@
             <div class="pulse-logo">
                 <i class="bi bi-heart-pulse-fill"></i>
             </div>
-            <h1 class="fw-bold mb-2">Welcome to AuraHMS</h1>
+            <h1 class="fw-bold mb-2">Welcome to {{$setting->hospital_name}}</h1>
             <p class="text-muted" style="font-size: 1.05rem;">Select your dedicated portal below to access dashboard operations, medical rosters, or patient electronic charts.</p>
         </div>
 

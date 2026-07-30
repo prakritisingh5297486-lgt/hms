@@ -6,7 +6,7 @@
         @else
             <div class="rounded d-flex align-items-center justify-content-center"
                 style="width:70px;height:70px;background:linear-gradient(135deg,#3b82f6,#06b6d4);">
-                <i class="bi bi-heart-pulse-fill text-white fs-2"></i>
+                <i class="bi bi-heart-pulse-fill text-white fs-5"></i>
             </div>
         @endif
         <span class="sidebar-brand-name">{{$setting->hospital_name}}</span>

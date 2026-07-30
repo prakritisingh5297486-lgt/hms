@@ -4,6 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AuraHMS - Patient Care Portal</title>
+    @if(!empty($setting?->favicon))
+        <link rel="icon" href="{{ asset('uploads/settings/'.$setting->favicon) }}" type="icon">
+    @else
+        <link rel="icon" type="image/png" href="{{ asset('uploads/settings/default-favicon.png') }}">
+    @endif
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Bootstrap Icons -->
@@ -129,7 +134,7 @@
                             PATIENT CARE PORTAL
                         </span>
                     </div>
-                    <h3 class="fw-bold mb-2">AuraHMS Patients</h3>
+                    <h3 class="fw-bold mb-2">{{$setting->hospital_name}} Patients</h3>
                     <p class="text-muted" style="font-size: 0.95rem;">Access your personal health registry, clinical records, laboratory checkup reports, and scheduling request portal.</p>
                 </div>
                 
@@ -155,7 +160,7 @@
                 </div>
 
                 <div class="text-muted" style="font-size: 0.75rem;">
-                    &copy; 2026 AuraHMS Technologies. All rights reserved.
+                    &copy; 2026 {{$setting->hospital_name}} Technologies. All rights reserved.
                 </div>
             </div>
 
